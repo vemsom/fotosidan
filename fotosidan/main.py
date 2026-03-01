@@ -3,6 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 from pathlib import Path
 from dotenv import load_dotenv
+import os
 
 from .config import settings
 from .database import init_db
@@ -36,10 +37,11 @@ static_path = Path(__file__).parent.parent / "static"
 if static_path.exists():
     app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
 
-# Register public routes
+# Register public routes (always)
 app.include_router(public.router)
 
-# Conditionally register admin routes
-if settings.admin_enabled:
+# Only register admin routes if ENABLE_ADMIN env var is set
+# This ensures admin routes are NOT exposed on public port 8000
+if os.getenv("ENABLE_ADMIN", "false").lower() == "true" and settings.admin_enabled:
     from .routes import admin
     app.include_router(admin.router, prefix="/admin")
