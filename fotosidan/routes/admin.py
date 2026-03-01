@@ -183,6 +183,13 @@ def process_upload(file_content: bytes, filename: str) -> tuple:
     small_path = settings.thumb_path / f"{photo_uuid}.jpg"
     small_img.save(str(small_path), format="JPEG", quality=100, progressive=True)
 
+    # Save medium image (1400px for responsive list view)
+    medium_img = img.copy()
+    medium_img.thumbnail((1400, 1400), Image.LANCZOS)
+    medium_path = settings.storage_path / "photos" / "medium" / f"{photo_uuid}.jpg"
+    medium_path.parent.mkdir(parents=True, exist_ok=True)
+    medium_img.save(str(medium_path), format="JPEG", quality=100, progressive=True)
+
     # Save large image (2400px for list and slideshow)
     large_img = img.copy()
     large_img.thumbnail((2400, 2400), Image.LANCZOS)
@@ -585,7 +592,7 @@ async def remove_tag(photo_id: int, tag_id: int, db: Session = Depends(get_db)):
 # Image serving routes (needed for admin thumbnails and display)
 @router.get("/photos/{uuid}/display")
 async def serve_display_image(uuid: str, db: Session = Depends(get_db)):
-    """Serve the display-size image (max 2560px)."""
+    """Serve the display-size image (max 2400px)."""
     photo = db.query(Photo).filter(Photo.uuid == uuid).first()
     if not photo:
         raise HTTPException(status_code=404, detail="Photo not found")
@@ -597,9 +604,23 @@ async def serve_display_image(uuid: str, db: Session = Depends(get_db)):
     return FileResponse(file_path, media_type="image/jpeg")
 
 
+@router.get("/photos/{uuid}/medium")
+async def serve_medium_image(uuid: str, db: Session = Depends(get_db)):
+    """Serve the medium-size image (max 1400px)."""
+    photo = db.query(Photo).filter(Photo.uuid == uuid).first()
+    if not photo:
+        raise HTTPException(status_code=404, detail="Photo not found")
+
+    file_path = settings.storage_path / "photos" / "medium" / f"{uuid}.jpg"
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Image file not found")
+
+    return FileResponse(file_path, media_type="image/jpeg")
+
+
 @router.get("/photos/{uuid}/thumb")
 async def serve_thumbnail(uuid: str, db: Session = Depends(get_db)):
-    """Serve the thumbnail image (max 600px)."""
+    """Serve the thumbnail image (max 800px)."""
     photo = db.query(Photo).filter(Photo.uuid == uuid).first()
     if not photo:
         raise HTTPException(status_code=404, detail="Photo not found")

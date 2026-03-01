@@ -33,7 +33,7 @@ async def gallery(db: Session = Depends(get_db)):
         safe_title = html.escape(photo.title or 'Photo')
         gallery_html += f"""        <figure class="photo-item" data-photo-id="{photo.id}" data-tags="{tags_attr}">
             <img class="grid-2-img" src="/photos/{photo.uuid}/thumb" alt="{safe_title}" loading="lazy">
-            <img class="grid-1-img" src="/photos/{photo.uuid}/display" alt="{safe_title}" loading="lazy" style="display: none;">
+            <img class="grid-1-img" srcset="/photos/{photo.uuid}/medium 1400w, /photos/{photo.uuid}/display 2400w" src="/photos/{photo.uuid}/medium" alt="{safe_title}" loading="lazy" style="display: none;">
             <div class="photo-tags">{tags_str}</div>
         </figure>
 """
@@ -97,7 +97,7 @@ async def gallery(db: Session = Depends(get_db)):
 
 @router.get("/photos/{uuid}/display")
 async def serve_display_image(uuid: str, db: Session = Depends(get_db)):
-    """Serve the display-size image (max 2560px)."""
+    """Serve the display-size image (max 2400px)."""
     photo = db.query(Photo).filter(Photo.uuid == uuid).first()
     if not photo:
         raise HTTPException(status_code=404, detail="Photo not found")
@@ -109,9 +109,23 @@ async def serve_display_image(uuid: str, db: Session = Depends(get_db)):
     return FileResponse(file_path, media_type="image/jpeg")
 
 
+@router.get("/photos/{uuid}/medium")
+async def serve_medium_image(uuid: str, db: Session = Depends(get_db)):
+    """Serve the medium-size image (max 1400px)."""
+    photo = db.query(Photo).filter(Photo.uuid == uuid).first()
+    if not photo:
+        raise HTTPException(status_code=404, detail="Photo not found")
+
+    file_path = settings.storage_path / "photos" / "medium" / f"{uuid}.jpg"
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Image file not found")
+
+    return FileResponse(file_path, media_type="image/jpeg")
+
+
 @router.get("/photos/{uuid}/thumb")
 async def serve_thumbnail(uuid: str, db: Session = Depends(get_db)):
-    """Serve the thumbnail image (max 600px)."""
+    """Serve the thumbnail image (max 800px)."""
     photo = db.query(Photo).filter(Photo.uuid == uuid).first()
     if not photo:
         raise HTTPException(status_code=404, detail="Photo not found")
