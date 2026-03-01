@@ -16,23 +16,6 @@ from ..config import settings
 router = APIRouter()
 
 
-def verify_admin_secret(request: Request):
-    """Verify admin secret from Authorization header."""
-    if not settings.admin_secret:
-        # If no secret is configured, deny all admin access
-        raise HTTPException(status_code=403, detail="Admin access is disabled")
-
-    auth_header = request.headers.get("Authorization", "")
-    if not auth_header.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing or invalid authorization")
-
-    token = auth_header[7:]  # Remove "Bearer " prefix
-    if token != settings.admin_secret:
-        raise HTTPException(status_code=401, detail="Invalid authorization token")
-
-    return True
-
-
 def _format_exposure_time(value) -> str:
     """Format exposure time as a fraction string like '1/250'."""
     if isinstance(value, float):
@@ -211,13 +194,13 @@ def process_upload(file_content: bytes, filename: str) -> tuple:
 
 
 @router.get("/")
-async def admin_index(auth: bool = Depends(verify_admin_secret)):
+async def admin_index():
     """Redirect to photos dashboard."""
     return RedirectResponse(url="/admin/photos")
 
 
 @router.get("/photos")
-async def dashboard(db: Session = Depends(get_db), auth: bool = Depends(verify_admin_secret)):
+async def dashboard(db: Session = Depends(get_db)):
     """Display admin dashboard with photo list."""
     photos = db.query(Photo).order_by(Photo.sort_order).all()
 
@@ -296,7 +279,7 @@ async def dashboard(db: Session = Depends(get_db), auth: bool = Depends(verify_a
 
 
 @router.get("/photos/upload")
-async def upload_form(auth: bool = Depends(verify_admin_secret)):
+async def upload_form():
     """Display upload form."""
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -325,7 +308,7 @@ async def upload_form(auth: bool = Depends(verify_admin_secret)):
 
 
 @router.post("/photos/upload")
-async def handle_upload(file: UploadFile = File(...), db: Session = Depends(get_db), auth: bool = Depends(verify_admin_secret)):
+async def handle_upload(file: UploadFile = File(...), db: Session = Depends(get_db)):
     """Handle photo upload, EXIF extraction, resizing, and database entry."""
     try:
         # Read file content
@@ -375,7 +358,7 @@ async def handle_upload(file: UploadFile = File(...), db: Session = Depends(get_
 
 
 @router.post("/photos/reorder")
-async def reorder_photos(request: Request, db: Session = Depends(get_db), auth: bool = Depends(verify_admin_secret)):
+async def reorder_photos(request: Request, db: Session = Depends(get_db)):
     """Update photo sort order from drag-and-drop reordering."""
     data = await request.json()
     order = data.get("order", [])
@@ -390,7 +373,7 @@ async def reorder_photos(request: Request, db: Session = Depends(get_db), auth: 
 
 
 @router.get("/photos/{photo_id}")
-async def photo_detail(photo_id: int, db: Session = Depends(get_db), auth: bool = Depends(verify_admin_secret)):
+async def photo_detail(photo_id: int, db: Session = Depends(get_db)):
     """Display photo detail and edit form."""
     photo = db.query(Photo).filter(Photo.id == photo_id).first()
     if not photo:
@@ -496,7 +479,7 @@ async def photo_detail(photo_id: int, db: Session = Depends(get_db), auth: bool 
 
 
 @router.post("/photos/{photo_id}")
-async def update_photo(photo_id: int, request: Request, db: Session = Depends(get_db), auth: bool = Depends(verify_admin_secret)):
+async def update_photo(photo_id: int, request: Request, db: Session = Depends(get_db)):
     """Update photo title, description, and visibility."""
     photo = db.query(Photo).filter(Photo.id == photo_id).first()
     if not photo:
@@ -521,7 +504,7 @@ async def update_photo(photo_id: int, request: Request, db: Session = Depends(ge
 
 
 @router.delete("/photos/{photo_id}")
-async def delete_photo(photo_id: int, db: Session = Depends(get_db), auth: bool = Depends(verify_admin_secret)):
+async def delete_photo(photo_id: int, db: Session = Depends(get_db)):
     """Delete a photo and its files."""
     photo = db.query(Photo).filter(Photo.id == photo_id).first()
     if not photo:
@@ -544,7 +527,7 @@ async def delete_photo(photo_id: int, db: Session = Depends(get_db), auth: bool 
 
 
 @router.post("/photos/{photo_id}/tags")
-async def add_tag(photo_id: int, request: Request, db: Session = Depends(get_db), auth: bool = Depends(verify_admin_secret)):
+async def add_tag(photo_id: int, request: Request, db: Session = Depends(get_db)):
     """Add a tag to a photo."""
     photo = db.query(Photo).filter(Photo.id == photo_id).first()
     if not photo:
@@ -582,7 +565,7 @@ async def add_tag(photo_id: int, request: Request, db: Session = Depends(get_db)
 
 
 @router.delete("/photos/{photo_id}/tags/{tag_id}")
-async def remove_tag(photo_id: int, tag_id: int, db: Session = Depends(get_db), auth: bool = Depends(verify_admin_secret)):
+async def remove_tag(photo_id: int, tag_id: int, db: Session = Depends(get_db)):
     """Remove a tag from a photo."""
     photo = db.query(Photo).filter(Photo.id == photo_id).first()
     if not photo:
