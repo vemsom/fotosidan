@@ -63,4 +63,4 @@ sudo systemctl status fotosidan-public fotosidan-admin
 echo ""
 echo "Access:"
 echo "  Public: http://localhost:8000"
-echo "  Admin: http://localhost:8001/admin/photos (localhost only)"
+echo "  Admin: http://localhost:8001 (internal network only)"

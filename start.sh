@@ -6,8 +6,8 @@ set -e
 PYTHON=/root/.pyenv/versions/3.9.21/bin/python3
 
 echo "Starting Fotosidan..."
-echo "- Public gallery: http://0.0.0.0:8000 (NO admin routes)"
-echo "- Admin portal: http://127.0.0.1:8001 (admin only, localhost)"
+echo "- Public gallery: http://0.0.0.0:8000"
+echo "- Admin portal: http://localhost:8001 (internal network only)"
 
 # Public gallery on port 8000 (NO admin routes)
 nohup $PYTHON -m uvicorn fotosidan.main:app --host 0.0.0.0 --port 8000 > public.log 2>&1 &
