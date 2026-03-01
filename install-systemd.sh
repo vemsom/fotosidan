@@ -8,10 +8,13 @@ WORKDIR=/srv/fotosidan
 
 echo "Installing Fotosidan systemd services..."
 
-# Stop existing services
-systemctl stop fotosidan-public fotosidan-admin 2>/dev/null || true
+# Kill any running instances
+pkill -f "uvicorn fotosidan" 2>/dev/null || true
 
-# Create public service (NO admin)
+# Stop existing services
+sudo systemctl stop fotosidan-public fotosidan-admin 2>/dev/null || true
+
+# Create public service (NO admin routes)
 sudo tee /etc/systemd/system/fotosidan-public.service > /dev/null <<'EOF'
 [Unit]
 Description=Fotosidan Public Gallery
@@ -21,7 +24,7 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/srv/fotosidan
-ExecStart=/root/.pyenv/versions/3.9.21/bin/python3 -m uvicorn fotosidan.main:app --host 0.0.0.0 --port 8000
+ExecStart=/root/.pyenv/versions/3.9.21/bin/python3 -m uvicorn fotosidan.app_public:app --host 0.0.0.0 --port 8000
 Restart=always
 RestartSec=5
 
@@ -29,7 +32,7 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 
-# Create admin service (WITH admin routes)
+# Create admin service (WITH admin routes, localhost only)
 sudo tee /etc/systemd/system/fotosidan-admin.service > /dev/null <<'EOF'
 [Unit]
 Description=Fotosidan Admin Portal
@@ -39,8 +42,7 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/srv/fotosidan
-Environment="ENABLE_ADMIN=true"
-ExecStart=/root/.pyenv/versions/3.9.21/bin/python3 -m uvicorn fotosidan.main:app --host 127.0.0.1 --port 8001
+ExecStart=/root/.pyenv/versions/3.9.21/bin/python3 -m uvicorn fotosidan.app_admin:app --host 127.0.0.1 --port 8001
 Restart=always
 RestartSec=5
 
@@ -59,7 +61,6 @@ echo "Status:"
 sudo systemctl status fotosidan-public fotosidan-admin
 
 echo ""
-echo "To manage:"
-echo "  systemctl status fotosidan-public fotosidan-admin"
-echo "  systemctl restart fotosidan-public fotosidan-admin"
-echo "  systemctl stop fotosidan-public fotosidan-admin"
+echo "Access:"
+echo "  Public: http://localhost:8000"
+echo "  Admin: http://localhost:8001/admin/photos (localhost only)"
