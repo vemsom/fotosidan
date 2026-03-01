@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  fotosidan:
+    build: .
+    container_name: fotosidan
+    ports:
+      # Public gallery (exposed externally)
+      - "8000:8000"
+      # Admin portal (NOT exposed - only accessible locally within container)
+      # To access admin: ssh into server and use curl -H "Authorization: Bearer $SECRET" http://localhost:8001
+    volumes:
+      - fotosidan-storage:/app/storage
+    environment:
+      # Required: Set this to a strong random string to protect admin access
+      ADMIN_SECRET: ${ADMIN_SECRET:-changeme}
+
+      # Optional configuration
+      SITE_TITLE: ${SITE_TITLE:-Fotosidan}
+      DATABASE_URL: ${DATABASE_URL:-sqlite:///storage/fotosidan.db}
+      STORAGE_PATH: ${STORAGE_PATH:-/app/storage}
+      ADMIN_ENABLED: ${ADMIN_ENABLED:-true}
+      MAX_UPLOAD_SIZE: ${MAX_UPLOAD_SIZE:-52428800}
+      ADMIN_PORT: 8001
+
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  fotosidan-storage:
+    driver: local

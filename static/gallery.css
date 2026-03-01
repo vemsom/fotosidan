@@ -1,0 +1,243 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: white;
+    font-family: system-ui, sans-serif;
+}
+
+.controls {
+    padding: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    z-index: 50;
+}
+
+.controls button {
+    background: none;
+    border: none;
+    font-size: 14px;
+    margin-right: 20px;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.2s;
+}
+
+.controls button.active {
+    color: #333;
+}
+
+.controls button:hover {
+    color: #666;
+}
+
+.tags-dropdown {
+    position: absolute;
+    top: 45px;
+    left: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0;
+    display: none;
+    flex-direction: column;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 100;
+}
+
+.tags-dropdown.active {
+    display: flex;
+}
+
+.dropdown-tag {
+    display: block;
+    padding: 10px 15px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.dropdown-tag:hover {
+    background: #f5f5f5;
+    color: #333;
+}
+
+.dropdown-tag.active {
+    color: #333;
+}
+
+.gallery {
+    display: none;
+    padding: 20px;
+    margin-top: 60px;
+}
+
+.gallery.active {
+    display: grid;
+    gap: 60px;
+    justify-content: center;
+    align-content: start;
+}
+
+.gallery.active.grid-2 {
+    grid-template-columns: repeat(2, 800px);
+}
+
+@media (max-width: 1600px) {
+    .gallery.active.grid-2 {
+        grid-template-columns: 1fr;
+        justify-items: center;
+    }
+}
+
+@media (min-width: 2560px) {
+    .gallery.active.grid-2 {
+        grid-template-columns: repeat(3, 800px);
+    }
+}
+
+@media (min-width: 3420px) {
+    .gallery.active.grid-2 {
+        grid-template-columns: repeat(4, 800px);
+    }
+}
+
+.gallery.active.grid-1 {
+    grid-template-columns: 1fr;
+    justify-items: center;
+}
+
+.photo-item {
+    cursor: default;
+    margin: 0;
+}
+
+.photo-item img {
+    display: block;
+    width: auto;
+    height: auto;
+}
+
+.photo-tags {
+    font-size: 12px;
+    color: #999;
+    margin-top: 5px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.photo-tag {
+    display: inline-block;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.photo-tag.active {
+    color: #333;
+}
+
+.grid-2-img {
+    display: block;
+}
+
+.grid-1-img {
+    display: none;
+}
+
+.gallery.active.grid-2 .grid-1-img {
+    display: none !important;
+}
+
+.gallery.active.grid-2 .grid-2-img {
+    display: block !important;
+}
+
+.gallery.active.grid-1 .grid-2-img {
+    display: none !important;
+}
+
+.gallery.active.grid-1 .grid-1-img {
+    display: block !important;
+}
+
+.slideshow {
+    display: none;
+    width: 100%;
+    height: 100vh;
+    margin-top: 60px;
+}
+
+.slideshow.active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100vh;
+    padding: 20px;
+    gap: 20px;
+    overflow: hidden;
+}
+
+.slideshow-image {
+    max-height: 80vh;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.slideshow-controls {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.slideshow-controls button {
+    background: none;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.2s;
+}
+
+.slideshow-controls button:hover {
+    color: #333;
+}
+
+.lightbox {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.lightbox.active {
+    display: flex;
+}
+
+.lightbox-image {
+    max-height: 90vh;
+    max-width: 90vw;
+    object-fit: contain;
+}
