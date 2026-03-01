@@ -580,3 +580,32 @@ async def remove_tag(photo_id: int, tag_id: int, db: Session = Depends(get_db)):
         db.commit()
 
     return ""
+
+
+# Image serving routes (needed for admin thumbnails and display)
+@router.get("/photos/{uuid}/display")
+async def serve_display_image(uuid: str, db: Session = Depends(get_db)):
+    """Serve the display-size image (max 2560px)."""
+    photo = db.query(Photo).filter(Photo.uuid == uuid).first()
+    if not photo:
+        raise HTTPException(status_code=404, detail="Photo not found")
+
+    file_path = settings.display_path / f"{uuid}.jpg"
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Image file not found")
+
+    return FileResponse(file_path, media_type="image/jpeg")
+
+
+@router.get("/photos/{uuid}/thumb")
+async def serve_thumbnail(uuid: str, db: Session = Depends(get_db)):
+    """Serve the thumbnail image (max 600px)."""
+    photo = db.query(Photo).filter(Photo.uuid == uuid).first()
+    if not photo:
+        raise HTTPException(status_code=404, detail="Photo not found")
+
+    file_path = settings.thumb_path / f"{uuid}.jpg"
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Image file not found")
+
+    return FileResponse(file_path, media_type="image/jpeg")
