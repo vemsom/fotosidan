@@ -218,7 +218,7 @@ async def dashboard(db: Session = Depends(get_db)):
     <div class="admin-container">
         <a href="/" style="text-decoration: none; color: #999; font-size: 14px; margin-bottom: 20px; display: inline-block;">← back to {settings.site_title}</a>
         <h1>{settings.site_title} Admin</h1>
-        <a href="/admin/photos/upload" class="btn btn-primary">Upload Photo</a>
+        <a href="/photos/upload" class="btn btn-primary">Upload Photo</a>
 
         <h2>Photos</h2>
         <table id="photos-list" class="photos-table">
@@ -244,12 +244,12 @@ async def dashboard(db: Session = Depends(get_db)):
                     <td>{tags_str or '-'}</td>
                     <td>
                         <input type="checkbox" {"checked" if photo.visible else ""}
-                               hx-post="/admin/photos/{photo.id}?action=toggle_visible"
+                               hx-post="/photos/{photo.id}?action=toggle_visible"
                                hx-on::after-request="location.reload()">
                     </td>
                     <td>
-                        <a href="/admin/photos/{photo.id}" class="btn btn-small">Edit</a>
-                        <button hx-delete="/admin/photos/{photo.id}"
+                        <a href="/photos/{photo.id}" class="btn btn-small">Edit</a>
+                        <button hx-delete="/photos/{photo.id}"
                                 hx-confirm="Delete this photo?"
                                 class="btn btn-small btn-danger">Delete</button>
                     </td>
@@ -263,7 +263,7 @@ async def dashboard(db: Session = Depends(get_db)):
         const sortable = Sortable.create(document.getElementById('sortable-photos'), {
             onEnd: async () => {
                 const order = Array.from(document.querySelectorAll('.photo-row')).map(row => row.dataset.photoId);
-                await fetch('/admin/photos/reorder', {
+                await fetch('/photos/reorder', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({order: order.map(Number)})
@@ -292,13 +292,13 @@ async def upload_form():
 <body>
     <div class="admin-container">
         <h1>Upload Photo</h1>
-        <form method="post" enctype="multipart/form-data" action="/admin/photos/upload">
+        <form method="post" enctype="multipart/form-data" action="/photos/upload">
             <div class="form-group">
                 <label for="file">Photo File</label>
                 <input type="file" name="file" id="file" required accept="image/jpeg,image/jpg">
             </div>
             <button type="submit" class="btn btn-primary">Upload</button>
-            <a href="/admin/photos" class="btn">Cancel</a>
+            <a href="/photos" class="btn">Cancel</a>
         </form>
     </div>
 </body>
@@ -351,7 +351,7 @@ async def handle_upload(file: UploadFile = File(...), db: Session = Depends(get_
 
         db.commit()
 
-        return RedirectResponse(url=f"/admin/photos/{photo.id}", status_code=303)
+        return RedirectResponse(url=f"/photos/{photo.id}", status_code=303)
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
@@ -401,7 +401,7 @@ async def photo_detail(photo_id: int, db: Session = Depends(get_db)):
     for tag in photo.tags:
         tags_html += f"""<span class="tag-badge">
             {tag.name}
-            <button type="button" hx-delete="/admin/photos/{photo.id}/tags/{tag.id}"
+            <button type="button" hx-delete="/photos/{photo.id}/tags/{tag.id}"
                     hx-swap="outerHTML swap:1s" class="tag-remove">×</button>
         </span>
 """
@@ -417,7 +417,7 @@ async def photo_detail(photo_id: int, db: Session = Depends(get_db)):
 </head>
 <body>
     <div class="admin-container">
-        <a href="/admin/photos" class="btn">← Back</a>
+        <a href="/photos" class="btn">← Back</a>
 
         <h1>Photo Detail</h1>
 
@@ -425,7 +425,7 @@ async def photo_detail(photo_id: int, db: Session = Depends(get_db)):
             <img src="/photos/{photo.uuid}/display" alt="" style="max-width: 500px; max-height: 500px;">
         </div>
 
-        <form method="post" action="/admin/photos/{photo.id}">
+        <form method="post" action="/photos/{photo.id}">
             <div class="form-group">
                 <label for="title">Title</label>
                 <input type="text" name="title" id="title" value="{photo.title or ''}">
@@ -458,7 +458,7 @@ async def photo_detail(photo_id: int, db: Session = Depends(get_db)):
             {tags_html if tags_html else '<p>No tags</p>'}
         </div>
 
-        <form id="tag-form" hx-post="/admin/photos/{photo.id}/tags" hx-target="#tags-container" hx-swap="innerHTML">
+        <form id="tag-form" hx-post="/photos/{photo.id}/tags" hx-target="#tags-container" hx-swap="innerHTML">
             <div class="form-group">
                 <label for="new-tag">Add Tag</label>
                 <input type="text" name="tag_name" id="new-tag" placeholder="Enter tag name" required>
@@ -500,7 +500,7 @@ async def update_photo(photo_id: int, request: Request, db: Session = Depends(ge
     photo.visible = "visible" in form_data
 
     db.commit()
-    return RedirectResponse(url=f"/admin/photos/{photo_id}", status_code=303)
+    return RedirectResponse(url=f"/photos/{photo_id}", status_code=303)
 
 
 @router.delete("/photos/{photo_id}")
@@ -556,7 +556,7 @@ async def add_tag(photo_id: int, request: Request, db: Session = Depends(get_db)
     for t in photo.tags:
         tags_html += f"""<span class="tag-badge">
             {t.name}
-            <button type="button" hx-delete="/admin/photos/{photo.id}/tags/{t.id}"
+            <button type="button" hx-delete="/photos/{photo.id}/tags/{t.id}"
                     hx-swap="outerHTML swap:1s" class="tag-remove">×</button>
         </span>
 """
