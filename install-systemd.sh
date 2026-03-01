@@ -42,7 +42,7 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/srv/fotosidan
-ExecStart=/root/.pyenv/versions/3.9.21/bin/python3 -m uvicorn fotosidan.app_admin:app --host 127.0.0.1 --port 8001
+ExecStart=/root/.pyenv/versions/3.9.21/bin/python3 -m uvicorn fotosidan.app_admin:app --host 0.0.0.0 --port 8001
 Restart=always
 RestartSec=5
 
