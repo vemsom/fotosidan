@@ -196,7 +196,7 @@ def process_upload(file_content: bytes, filename: str) -> tuple:
 @router.get("/")
 async def admin_index():
     """Redirect to photos dashboard."""
-    return RedirectResponse(url="/admin/photos")
+    return RedirectResponse(url="/photos")
 
 
 @router.get("/photos")
