@@ -111,12 +111,16 @@ async def serve_display_image(uuid: str, db: Session = Depends(get_db)):
 
 @router.get("/photos/{uuid}/medium")
 async def serve_medium_image(uuid: str, db: Session = Depends(get_db)):
-    """Serve the medium-size image (max 1400px)."""
+    """Serve the medium-size image (max 1400px). Falls back to display if not found."""
     photo = db.query(Photo).filter(Photo.uuid == uuid).first()
     if not photo:
         raise HTTPException(status_code=404, detail="Photo not found")
 
     file_path = settings.storage_path / "photos" / "medium" / f"{uuid}.jpg"
+    # Fall back to display image if medium doesn't exist (for older uploads)
+    if not file_path.exists():
+        file_path = settings.display_path / f"{uuid}.jpg"
+
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="Image file not found")
 
