@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 from .config import settings
 from .database import init_db
-from .routes import public, admin
+from .routes import admin
 
 # Load .env file
 load_dotenv()
@@ -64,9 +64,6 @@ async def not_found(request: Request, exc):
         """,
         status_code=404,
     )
-
-# Register public routes
-app.include_router(public.router)
 
 # Register admin routes at root (no /admin prefix)
 if settings.admin_enabled:
