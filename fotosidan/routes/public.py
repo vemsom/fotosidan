@@ -33,7 +33,7 @@ async def gallery(db: Session = Depends(get_db)):
         safe_title = html.escape(photo.title or 'Photo')
         gallery_html += f"""        <figure class="photo-item" data-photo-id="{photo.id}" data-tags="{tags_attr}">
             <img class="grid-2-img" src="/photos/{photo.uuid}/thumb" alt="{safe_title}" loading="lazy">
-            <img class="grid-1-img" srcset="/photos/{photo.uuid}/medium 1400w, /photos/{photo.uuid}/display 2400w" src="/photos/{photo.uuid}/medium" alt="{safe_title}" loading="lazy" style="display: none;">
+            <img class="grid-1-img" srcset="/photos/{photo.uuid}/thumb 800w, /photos/{photo.uuid}/medium 1400w, /photos/{photo.uuid}/display 2400w" sizes="(max-width: 1600px) 800px, (max-width: 2560px) 1400px, 2400px" src="/photos/{photo.uuid}/medium" alt="{safe_title}" loading="lazy" style="display: none;">
             <div class="photo-tags">{tags_str}</div>
         </figure>
 """
